@@ -73,6 +73,7 @@ def add_food():
     count = food_data.get('Count')
     type_ = food_data.get('Type')
 
+
     # 필수 필드 확인
     if not all([refr_id, food_name, input_date, count, cat_name, exp_date, type_]):
         return jsonify({"error": "refri_id, food_name, input_date, count, cat_id, exp_date, and type are required"}), 400
@@ -109,15 +110,15 @@ def add_food():
                 UPDATE contain 
                 SET count = %s, input_date = %s, exp_date = %s, type = %s
                 WHERE food_name = %s AND cat_name = %s AND Refri_ID = %s AND
-                    input_date = %s AND exp_date = %s
+                    input_date = %s AND exp_date = %s 
             '''
             cursor.execute(update_sql, (new_count, input_date_str, exp_date_str, type_, food_name, cat_name, refr_id, input_date_str, exp_date_str))
             message = "재고가 업데이트 되었습니다."
         else:
             # 냉장고에 음식이 없을 경우 새로 추가
             insert_sql = '''
-                INSERT INTO contain (Refri_id, food_name, input_date, exp_date, cat_name, count, type) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO contain (Refri_id, food_name, input_date, exp_date, cat_name, count, type, status) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
             '''
             cursor.execute(insert_sql, (refr_id, food_name, input_date_str, exp_date_str, cat_name, count, type_))
             message = f"{food_name}가 {count}만큼 추가되었습니다"
@@ -143,15 +144,7 @@ def delete_food():
     cat_name = food_data.get('Cat_Name')
     count = food_data.get('Count')
     type_ = food_data.get('Type')
-
-    print()
-    print()
-    print()
-    print(food_data)
-    print()
-    print()
-    print()
-
+    
 
     # 필수 필드 확인
     if not all([refr_id, food_name, input_date, exp_date]):

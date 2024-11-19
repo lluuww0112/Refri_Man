@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS `refri_man`.`contain` (
   `cat_name` VARCHAR(255) NOT NULL,
   `count` INT NOT NULL,
   `type` ENUM('냉장', '냉동') NOT NULL,
+  `status` int NOT NULL,
   PRIMARY KEY (`food_name`, `input_date`, `refri_id`),
   UNIQUE INDEX `food_name` (`food_name` ASC, `input_date` ASC) VISIBLE,
   INDEX `cat_name` (`cat_name` ASC) VISIBLE,

@@ -113,6 +113,7 @@
                     <th>유통기한</th>
                     <th>수량</th>
                     <th>유형</th>
+                    <th>상태</th>
                     <th>삭제</th>
                 </tr>
             </thead>
@@ -238,6 +239,7 @@
                     <td>${exp_date}</td>
                     <td>${food.count}</td>
                     <td>${food.type}</td>
+                    <td>${food.status}</td>
                     <td><button onclick="deleteFood(
                         '${food.food_name}',
                         '${input_date}',

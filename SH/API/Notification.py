@@ -25,9 +25,10 @@ def check_expiry():
             sql_expiry_soon = """
             SELECT food_name, input_date, exp_date 
             FROM contain 
-            WHERE Refri_ID = %s 
-              AND DATEDIFF(exp_date, input_date) <= DATEDIFF(%s, input_date)
-              AND DATEDIFF(exp_date, %s) >= 0
+            WHERE 
+                Refri_ID = %s 
+                AND DATEDIFF(exp_date, input_date) <= DATEDIFF(%s, input_date)
+                AND DATEDIFF(exp_date, %s) >= 0
             """
             cursor.execute(sql_expiry_soon, (refri_id, today, today))
             expiry_soon = cursor.fetchall()  # 임박한 유통기한 결과 가져오기

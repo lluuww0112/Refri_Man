@@ -40,6 +40,15 @@ def search_fridge():
             """
             cursor.execute(sql, (refri_id,))
             data = cursor.fetchall()  # 결과 가져오기
+
+            print()
+            print()
+            print()
+            print(data)
+            print()
+            print()
+            print()
+
         return jsonify(data)  # 검색 결과 반환
     finally:
         connection.close()
