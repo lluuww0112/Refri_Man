@@ -122,11 +122,15 @@
         </table>
     </div>
 
+    
     <div class="food-form">
         <h2>음식 추가</h2>
         <form id="addFoodForm">
             <label for="food_name">음식 이름</label>
             <input type="text" id="food_name" placeholder="음식 이름 입력" required>
+
+            <label for="input_date">입력일</label>
+            <input type="date" id="input_date" required>
 
             <label for="exp_date">유통기한</label>
             <input type="date" id="exp_date" required>
@@ -160,11 +164,12 @@
             const food_name = document.getElementById('food_name').value;
             const count = document.getElementById('count').value;
             const cat_name = document.getElementById('cat_name').value;
+            const input_date = document.getElementById('input_date').value;
             const exp_date = document.getElementById('exp_date').value;
             const type = document.getElementById('type').value;
 
             try {
-                await add_contain(food_name, count, cat_name, exp_date, type);
+                await add_contain(food_name, count, cat_name, input_date, exp_date, type);
                 alert('음식이 성공적으로 추가되었습니다!');
                 await get_contain();  // 음식 추가 후 갱신
             } catch (error) {
@@ -174,10 +179,12 @@
         }
 
 
-        async function add_contain(food_name, count, cat_name, exp_date, type) {
+        // 재고추가
+        async function add_contain(food_name, count, cat_name, input_date, exp_date, type) {
             const data = {
                 Refri_ID: localStorage.getItem('Refri_ID'),
                 Food_Name: food_name,
+                Input_Date : input_date,
                 Exp_Date: exp_date,
                 Cat_Name: cat_name,
                 Count: count,
@@ -198,6 +205,7 @@
             }
         }
 
+        // 재고 목록 반환
         async function get_contain() {
             const data = {
                 Refri_ID: localStorage.getItem("Refri_ID"),

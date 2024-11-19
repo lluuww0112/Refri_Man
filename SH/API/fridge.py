@@ -67,7 +67,7 @@ def add_food():
     food_data = request.json
     refr_id = food_data.get('Refri_ID')
     food_name = food_data.get('Food_Name')
-    input_date = datetime.now().date()  # 현재 날짜로 설정
+    input_date = food_data.get('Input_Date')  # 현재 날짜로 설정
     exp_date = food_data.get('Exp_Date')  
     cat_name = food_data.get('Cat_Name')
     count = food_data.get('Count')
@@ -79,7 +79,7 @@ def add_food():
 
     # 날짜 유효성 확인 및 변환
     try:
-        input_date_str = input_date.strftime('%Y-%m-%d')  # 날짜를 문자열로 변환
+        input_date_str = datetime.strptime(input_date, '%Y-%m-%d').strftime('%Y-%m-%d')  # 입력일도 문자열로 변환
         exp_date_str = datetime.strptime(exp_date, '%Y-%m-%d').strftime('%Y-%m-%d')  # 유통기한도 문자열로 변환
     except ValueError:
         return jsonify({"error": "Date format should be YYYY-MM-DD", 'status' : 0})
