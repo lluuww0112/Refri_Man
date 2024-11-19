@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>회원가입 및 로그인</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+
+            form {
+                margin-bottom: 20px;
+            }
+
+            input {
+                display: block;
+                margin-bottom: 10px;
+                padding: 8px;
+                width: 300px;
+            }
+
+            button {
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background-color: #45a049;
+            }
+
+            .message {
+                color: red;
+            }
+
+            .button-container {
+                display: flex;
+                /* Flexbox 사용 */
+                gap: 10px;
+                /* 버튼 사이 간격 */
+                justify-content: left;
+                /* 가운데 정렬 (옵션) */
+            }
+
+            /* 버튼 스타일 */
+            .button-container button {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                background-color: #4CAF50;
+                color: white;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            /* 호버 효과 */
+            .button-container button:hover {
+                background-color: #45a049;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>로그인</h1>
+        <form id="loginForm">
+            <input type="text" id="ID" placeholder="아이디" required>
+            <input type="password" id="PSW" placeholder="비밀번호" required>
+            <div class="button-container">
+                <button type="submit">로그인</button>
+                <button type="regist_page_button" onclick="window.location.href='Registration_page'">회원가입</button>
+            </div>
+        </form>
+        <div class="message" id="loginMessage"></div>
+        <script>
+            function getCookieValue(cookieName) { // 쿠키 불러오기 함수
+                const cookies = document.cookie.split('; ');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.split('=');
+                    if (name === cookieName) {
+                        return value;
+                    }
+                }
+                return null; // 쿠키가 없으면 null 반환
+            }
+
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                // 기본 폼 동작 중단
+
+                const data = {
+                    ID: document.getElementById('ID').value,
+                    PSW: document.getElementById('PSW').value
+                };
+
+                if (!data.ID || !data.PSW) {
+                    alert('Please fill out all fields.');
+                    return;
+                }
+
+                try {
+                    // 서버로 POST 요청 전송
+                    const response = await fetch('http://127.0.0.1:5001/Regist/login_request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                        // JSON 데이터 전달
+                    });
+
+                    const result = await response.json();
+                    if (result.status === 0) {
+                        alert(result.message);
+                        // 비밀번호를 틀렸다면 알림
+                    } else {
+                        alert(result.message);
+                        // 로그인 성공 메시지 출력 및 페이지 이동
+                        // 로그인 정보 쿠키에 저장
+                        localStorage.setItem('ID', data.ID);
+                        window.location.href = "./main_page";
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your request.');
+                }
+            });
+
+            
+        </script>
+    </body>
+</html>

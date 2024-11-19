@@ -18,7 +18,7 @@ def User_resist():
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        sql = 'select ID from User where ID=%s'
+        sql = 'select user_ID from User where user_ID=%s'
         cursor.execute(sql, ID)
         data = cursor.fetchall()
         if(check_already_resisted(data, ID)):
@@ -48,14 +48,14 @@ def login_request():
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        sql = 'select PSW from User where ID=%s'
+        sql = 'select user_PSW from User where user_ID=%s'
         cursor.execute(sql, ID)
         data = cursor.fetchone()
     connection.close()
 
     if(data == None):
         return jsonify({'message' : '해당 유저는 존재하지 않습니다', 'status' : 0})
-    elif(data['PSW'] != PSW):
+    elif(data['user_PSW'] != PSW):
         return jsonify({'message' : '비밀번호가 틀렸습니다', 'status' : 0})
     else:
         return jsonify({'message' : '환영합니다', 'status' : 1})

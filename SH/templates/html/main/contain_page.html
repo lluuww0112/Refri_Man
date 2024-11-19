@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>냉장고 음식 추가</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .food-list {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            max-width: 600px;
+            background-color: #f9f9f9;
+        }
+
+        .food-list h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input#searchInput {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #e60000;
+        }
+
+        .food-form {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            max-width: 400px;
+            background-color: #f9f9f9;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="food-list">
+        <h2>재고</h2>
+        <input type="text" id="searchInput" placeholder="음식 이름 또는 카테고리로 검색" oninput="filterFoodList()">
+        <table id="foodTable">
+            <thead>
+                <tr>
+                    <th>음식 이름</th>
+                    <th>카테고리</th>
+                    <th>입고 날짜</th>
+                    <th>유통기한</th>
+                    <th>수량</th>
+                    <th>유형</th>
+                    <th>삭제</th>
+                </tr>
+            </thead>
+            <tbody id="foodListContainer">
+                <!-- 음식 목록이 동적으로 여기에 표시됩니다 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="food-form">
+        <h2>음식 추가</h2>
+        <form id="addFoodForm">
+            <label for="food_name">음식 이름</label>
+            <input type="text" id="food_name" placeholder="음식 이름 입력" required>
+
+            <label for="input_date">입고 날짜</label>
+            <input type="date" id="input_date" required>
+
+            <label for="exp_date">유통기한</label>
+            <input type="date" id="exp_date" required>
+
+            <label for="cat_name">카테고리</label>
+            <select id="cat_name" required>
+                <option value="과일">과일</option>
+                <option value="생선">생선</option>
+                <option value="소스">소스</option>
+                <option value="유제품">유제품</option>
+                <option value="육류">육류</option>
+                <option value="음료">음료</option>
+                <option value="채소">채소</option>
+            </select>
+
+            <label for="count">수량</label>
+            <input type="number" id="count" placeholder="수량 입력" required>
+
+            <label for="type">유형</label>
+            <select id="type" required>
+                <option value="냉장">냉장</option>
+                <option value="냉동">냉동</option>
+            </select>
+
+            <button type="button" onclick="handleSubmit()">음식 추가</button>
+        </form>
+    </div>
+
+    <script>
+        async function handleSubmit() {
+            const food_name = document.getElementById('food_name').value;
+            const input_date = document.getElementById('input_date').value;
+            const count = document.getElementById('count').value;
+            const cat_name = document.getElementById('cat_name').value;
+            const exp_date = document.getElementById('exp_date').value;
+            const type = document.getElementById('type').value;
+
+            try {
+                await add_contain(food_name, input_date, count, cat_name, exp_date, type);
+                alert('음식이 성공적으로 추가되었습니다!');
+                await get_contain();
+            } catch (error) {
+                console.error('오류가 발생했습니다:', error);
+                alert('음식을 추가하는 데 실패했습니다.');
+            }
+        }
+
+        async function add_contain(food_name, input_date, count, cat_name, exp_date, type) {
+            const data = {
+                Refri_ID: localStorage.getItem('Refri_ID'),
+                Food_Name: food_name,
+                Exp_Date: exp_date,
+                Cat_Name: cat_name,
+                Count: count,
+                Type: type                    
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/Fridge/add_food', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '요청이 실패했습니다.');
+            }
+        }
+
+        async function get_contain() {
+            const data = {
+                Refri_ID: localStorage.getItem("Refri_ID"),
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/Search/fridge_search', {
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            const foodListContainer = document.getElementById('foodListContainer');
+            foodListContainer.innerHTML = '';
+
+            result.forEach(food => {
+                const row = document.createElement('tr');
+                let input_date = new Date(food.input_date).toLocaleDateString();
+                let exp_date = new Date(food.exp_date).toLocaleDateString();
+
+                row.innerHTML = `
+                    <td>${food.food_name}</td>
+                    <td>${food.cat_name}</td>
+                    <td>${input_date}</td>
+                    <td>${exp_date}</td>
+                    <td>${food.count}</td>
+                    <td>${food.type}</td>
+                    <td><button onclick="deleteFood(
+                        '${food.food_name}',
+                        '${input_date}',
+                        '${exp_date}',
+                        '${food.cat_name}',
+                        ${food.count},
+                        '${food.type}'
+                    )">삭제</button></td>
+                `;
+                foodListContainer.appendChild(row);
+            });
+        }
+
+        function filterFoodList() {
+            const searchInput = document.getElementById("searchInput").value.toLowerCase();
+            const rows = document.querySelectorAll("#foodListContainer tr");
+
+            rows.forEach(row => {
+                const foodName = row.cells[0].textContent.toLowerCase();
+                const category = row.cells[1].textContent.toLowerCase();
+                
+                if (foodName.includes(searchInput) || category.includes(searchInput)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        async function deleteFood(food_name, input_date, exp_date, cat_name, count, type) {
+            const data = {
+                Refri_ID : localStorage.getItem("Refri_ID"),
+                Food_Name : food_name, 
+                Input_Date : formatDate(input_date),
+                Exp_Date : formatDate(exp_date),
+                Cat_Name : cat_name,
+                Count : count,
+                Type : type
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/Fridge/delete_food', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                alert('음식 삭제 실패: ' + (error.message || '알 수 없는 오류'));
+            } else {
+                alert('음식이 삭제되었습니다!');
+                await get_contain();
+            }
+        }
+
+        function formatDate(dateString) {
+            const dateParts = dateString.split('/');
+            const [month, day, year] = dateParts;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

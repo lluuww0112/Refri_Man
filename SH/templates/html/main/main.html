@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Main Page</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                padding: 10px;
+                background-color: #f4f4f9;
+            }
+            h1 {
+                font-size: 24px;
+                color: #333;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                background-color: #ffffff;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            form {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            input[type="text"] {
+                flex: 1;
+                padding: 6px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+                outline: none;
+            }
+            input[type="text"]:focus {
+                border-color: #4CAF50;
+            }
+            button {
+                padding: 6px 12px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            .refri-list {
+                margin-top: 20px;
+            }
+            .refri-item {
+                padding: 12px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background-color: #f9f9f9;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: background-color 0.3s;
+            }
+            .refri-item:hover {
+                background-color: #f0f0f0;
+            }
+            .refri-item span {
+                font-size: 16px;
+                color: #555;
+            }
+            .refri-item .refri-name {
+                color: #333;
+                font-size: 16px;
+                cursor: pointer;
+            }
+            .refri-item .delete-btn {
+                background-color: #f44336;
+                color: white;
+                padding: 4px 8px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .refri-item .delete-btn:hover {
+                background-color: #d32f2f;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>냉장고 추가 및 목록</h1>
+        <div class="container">
+            <form id="add-refri-form">
+                <input type="text" id="refri_name" name="refri_name" placeholder="냉장고 이름" required>
+                <button type="submit" onclick="add_Refri()">추가</button>
+            </form>
+
+            <div class="refri-list" id="refri-list">
+                <h3>냉장고 목록</h3>
+                <!-- 냉장고 리스트 뷰 -->
+            </div>
+        </div>
+
+        <script>
+
+            // 접속중인 유저의 냉장고 목록 반환
+            async function getRefri() {
+                const data = {
+                    User_ID: localStorage.getItem('ID')
+                };
+
+                const response = await fetch('http://127.0.0.1:5001/Search/get_Refri_ID', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log(result);
+                return result;
+            }
+
+            // html로 목록 display
+            function displayRefriList(refriList) {
+                const refriListContainer = document.getElementById('refri-list');
+                refriListContainer.innerHTML = '';
+
+                refriList.forEach(refri => {
+                    const refriItem = document.createElement('div');
+                    refriItem.className = 'refri-item';
+
+                    // 이름만 표시
+                    const refriDetails = document.createElement('span');
+                    refriDetails.className = 'refri-name';
+                    refriDetails.innerHTML = refri.Refri_Name;
+                    refriDetails.onclick = function(){
+                        let Refri_ID = refri.Refri_ID;
+                        localStorage.setItem('Refri_ID', Refri_ID);
+
+                        window.location.href = '/contain_page'
+                    };
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-btn';
+                    deleteButton.textContent = '삭제';
+                    deleteButton.onclick = () => deleteRefri(refri.Refri_ID);
+
+                    refriItem.appendChild(refriDetails);
+                    refriItem.appendChild(deleteButton);
+                    refriListContainer.appendChild(refriItem);
+                });
+            }
+
+            // 특정 냉장고 삭제
+            async function deleteRefri(refriId) {
+                data = {
+                    Refri_ID : refriId
+                };
+
+                const response = await fetch('http://127.0.0.1:5001/Fridge/delete_Refri', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log(result);
+                if(result.status){
+                    alert(result.message);
+                    const refri_list = await getRefri();
+                    displayRefriList(refri_list);
+                }
+                else{
+                    alert("오류 발생");
+                }
+                
+            }
+
+            // 냉장고 추가
+            async function add_Refri(){
+                data = {
+                    Refri_Name : document.getElementById("refri_name").value,
+                    User_ID : localStorage.getItem('ID')
+                };
+
+                const response = await fetch('http://127.0.0.1:5001/Fridge/add_Refri', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if(result.status){
+                    alert(result.message);
+                }
+                else{
+                    alert("오류 발생");
+                }
+            }
+
+            // 윈도우 초기 로딩
+            window.onload = async function() {
+                const refriList = await getRefri();
+                console.log(refriList.Refri_ID);
+                displayRefriList(refriList);
+            };
+        </script>
+    </body>
+</html>
