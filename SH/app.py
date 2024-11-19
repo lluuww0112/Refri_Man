@@ -51,6 +51,13 @@ def Contain():
     return render_template('/html/Main/contain_page.html')
 
 
+# status업데이트 테스트 용
+@app.route('/test', methods=['GET', 'POST'])
+def test_function():
+    update_status()
+    return jsonify({'message' : 'work_well', 'status' : 1})
+
+
 # status업데이트 함수 정의
 def update_status():
     connection = get_db_connection()
