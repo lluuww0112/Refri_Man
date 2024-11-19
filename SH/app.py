@@ -1,5 +1,13 @@
+
+# 서버 구현용
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
+
+# 스케쥴러 임포팅
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+# DB 제어용
 import pymysql
 import pandas as pd
 
@@ -43,6 +51,41 @@ def Contain():
     return render_template('/html/Main/contain_page.html')
 
 
+# status업데이트 함수 정의
+def update_status():
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        sql = """
+            WITH exp_table AS (
+                SELECT exp_day, refri_id  
+                FROM contain
+                    NATURAL JOIN category
+            )
+            UPDATE contain 
+                JOIN exp_table  ON contain.refri_id = exp_table.refri_id  
+                SET contain.status = CASE
+                    WHEN DATEDIFF(contain.exp_date, CURDATE()) > exp_table.exp_day THEN 0
+                    WHEN DATEDIFF(contain.exp_date, CURDATE()) = exp_table.exp_day THEN 1
+                    WHEN DATEDIFF(contain.exp_date, CURDATE()) < 0 THEN 2
+            END;
+            """
+        cursor.execute(sql)
+        connection.commit()
+    connection.close()
+
+
+# 스케쥴러 초기화 및 실행
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    
+    # 매일 자정에 실행
+    trigger = CronTrigger(hour=0, minute=0)  
+    scheduler.add_job(update_status, trigger=trigger, id='daily_task')
+    
+    scheduler.start()
+
+
 
 if __name__ == '__main__':
+    start_scheduler()
     app.run(debug=True, port=5001)
