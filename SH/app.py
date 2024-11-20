@@ -14,7 +14,7 @@ import pandas as pd
 # API추가
 from DB import get_db_connection
 from API.Register import regist_BP
-from API.fridge import fridge_BP
+from API.Fridge import fridge_BP
 from API.History import history_BP
 from API.Search import search_BP
 
