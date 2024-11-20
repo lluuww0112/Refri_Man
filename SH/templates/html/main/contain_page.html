@@ -48,18 +48,34 @@
             font-size: 14px;
         }
 
-        button {
-            background-color: #ff4d4d;
+        
+         /* 상태 버튼 스타일 */
+         .status-fresh {
+            background-color: #4CAF50;
             color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
         }
 
-        button:hover {
-            background-color: #e60000;
+        .status-imminent {
+            background-color: orange;
+            color: white;
+            border: none;
+        }
+
+        .status-expired {
+            background-color: red;
+            color: white;
+            border: none;
+        }
+
+        /* 삭제 버튼 스타일 */
+        .delete-button {
+            background-color: #cccccc; /* 밝은 회색 */
+            color: white;
+            border: none;
+        }
+
+        .delete-button:hover {
+            background-color: #999999; /* 어두운 회색 */
         }
 
         /* 우측 음식 추가 폼 영역 */
@@ -103,7 +119,25 @@
 <body>
     <div class="food-list">
         <h2>재고</h2>
-        <input type="text" id="searchInput" placeholder="음식 이름 또는 카테고리로 검색" oninput="filterFoodList()" style="width: 100%; margin-bottom: 10px; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;">
+        <input type="text" id="searchInput" placeholder="음식 이름 또는 카테고리로 검색" oninput="filterFoodList()" 
+            style="width: 100%; margin-bottom: 10px; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;">
+    
+        <!-- 상태 필터 버튼 -->
+        <div id="statusFilter" style="margin-bottom: 10px; display: flex; justify-content: center; gap: 10px;">
+            <button class="status-fresh" onclick="filterByStatus('fresh')">신선</button>
+            <button class="status-imminent" onclick="filterByStatus('imminent')">임박</button>
+            <button class="status-expired" onclick="filterByStatus('expired')">만료</button>
+            <button class="delete-button" onclick="filterByStatus('all')">전체</button>
+        </div>
+    
+        <!-- 정렬 버튼 -->
+        <div id="dateSort" style="margin-bottom: 10px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="sortByColumn('Input_Date', 'asc')">입고날짜 오름차순</button>
+            <button onclick="sortByColumn('Input_Date', 'desc')">입고날짜 내림차순</button>
+            <button onclick="sortByColumn('Expiration_Date', 'asc')">유통기한 오름차순</button>
+            <button onclick="sortByColumn('Expiration_Date', 'desc')">유통기한 내림차순</button>
+        </div>
+    
         <table id="foodTable">
             <thead>
                 <tr>
@@ -122,7 +156,7 @@
             </tbody>
         </table>
     </div>
-
+    
     
     <div class="food-form">
         <h2>음식 추가</h2>
@@ -232,6 +266,20 @@
                 let input_date = new Date(food.input_date).toLocaleDateString();
                 let exp_date = new Date(food.exp_date).toLocaleDateString();
 
+                let statusButton = '';
+                switch (parseInt(food.status, 10)) {
+                    case 0:
+                        statusButton = '<button class="status-fresh">신선</button>';
+                        break;
+                    case 1:
+                        statusButton = '<button class="status-imminent">임박</button>';
+                        break;
+                    case 2:
+                        statusButton = '<button class="status-expired">만료</button>';
+                        break;    
+                }
+                
+
                 row.innerHTML = `
                     <td>${food.food_name}</td>
                     <td>${food.cat_name}</td>
@@ -239,8 +287,8 @@
                     <td>${exp_date}</td>
                     <td>${food.count}</td>
                     <td>${food.type}</td>
-                    <td>${food.status}</td>
-                    <td><button onclick="deleteFood(
+                    <td>${statusButton}</td>
+                    <td><button class="delete-button" onclick="deleteFood(
                         '${food.food_name}',
                         '${input_date}',
                         '${exp_date}',
@@ -311,6 +359,57 @@
                 }
             });
         }
+
+        function filterByStatus(status) {
+            const rows = document.querySelectorAll("#foodListContainer tr");
+
+            rows.forEach(row => {
+                const statusButton = row.querySelector("td button").className;
+
+                // 상태에 따라 표시 여부 결정
+                if (status === 'all' || statusButton.includes(`status-${status}`)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function sortByDate(order) {
+            const foodListContainer = document.getElementById('foodListContainer');
+            const rows = Array.from(foodListContainer.querySelectorAll('tr'));
+
+            rows.sort((rowA, rowB) => {
+                const dateA = new Date(rowA.cells[2].textContent.trim());
+                const dateB = new Date(rowB.cells[2].textContent.trim());
+
+                return order === 'asc' ? dateA - dateB : dateB - dateA;
+            });
+
+            // 정렬된 행 다시 추가
+            foodListContainer.innerHTML = '';
+            rows.forEach(row => foodListContainer.appendChild(row));
+        }
+
+        function sortByColumn(column, order) {
+            const foodListContainer = document.getElementById('foodListContainer');
+            const rows = Array.from(foodListContainer.querySelectorAll('tr'));
+
+            // 열 인덱스 결정
+            const columnIndex = column === 'Input_Date' ? 2 : 3;
+
+            rows.sort((rowA, rowB) => {
+                const dateA = new Date(rowA.cells[columnIndex].textContent.trim());
+                const dateB = new Date(rowB.cells[columnIndex].textContent.trim());
+
+                return order === 'asc' ? dateA - dateB : dateB - dateA;
+            });
+
+            // 정렬된 행 다시 추가
+            foodListContainer.innerHTML = '';
+            rows.forEach(row => foodListContainer.appendChild(row));
+        }
+
 
 
         window.onload = async function() {

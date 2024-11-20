@@ -1,8 +1,0 @@
-Regist/USER_regists -> ID 확인 및 DB에 존재하지 않을 시 추가
-Regist/login_request -> 로그인 요청
-
-/Fridge/add_Refri -> 냉장고 추가
-/Fridge/add_food -> 냉장고에 음식 추가
-/Fridge/delete_food -> 냉장고의 음식 삭제
-
-/Search//fridge_search -> 

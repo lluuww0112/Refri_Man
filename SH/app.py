@@ -15,7 +15,7 @@ import pandas as pd
 from DB import get_db_connection
 from API.Register import regist_BP
 from API.fridge import fridge_BP
-from API.Notification import notification_BP
+from API.History import history_BP
 from API.Search import search_BP
 
 
@@ -28,7 +28,7 @@ CORS(app)
 # API 요청 포인트 추가
 app.register_blueprint(regist_BP, url_prefix='/Regist')
 app.register_blueprint(fridge_BP, url_prefix='/Fridge')
-app.register_blueprint(notification_BP, url_prefix='/Notify')
+app.register_blueprint(history_BP, url_prefix='/History')
 app.register_blueprint(search_BP, url_prefix='/Search')
  
 
@@ -71,9 +71,9 @@ def update_status():
             UPDATE contain 
                 JOIN exp_table  ON contain.refri_id = exp_table.refri_id  
                 SET contain.status = CASE
+					WHEN DATEDIFF(contain.exp_date, CURDATE()) < 0 THEN 2
+                    WHEN DATEDIFF(contain.exp_date, CURDATE()) <= exp_table.exp_day THEN 1
                     WHEN DATEDIFF(contain.exp_date, CURDATE()) > exp_table.exp_day THEN 0
-                    WHEN DATEDIFF(contain.exp_date, CURDATE()) = exp_table.exp_day THEN 1
-                    WHEN DATEDIFF(contain.exp_date, CURDATE()) < 0 THEN 2
             END;
             """
         cursor.execute(sql)

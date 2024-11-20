@@ -1,224 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Main Page</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                padding: 10px;
-                background-color: #f4f4f9;
-            }
-            h1 {
-                font-size: 24px;
-                color: #333;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .container {
-                max-width: 600px;
-                margin: auto;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                background-color: #ffffff;
-                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            form {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            input[type="text"] {
-                flex: 1;
-                padding: 6px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                font-size: 14px;
-                outline: none;
-            }
-            input[type="text"]:focus {
-                border-color: #4CAF50;
-            }
-            button {
-                padding: 6px 12px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-            button:hover {
-                background-color: #45a049;
-            }
-            .refri-list {
-                margin-top: 20px;
-            }
-            .refri-item {
-                padding: 12px;
-                margin-bottom: 10px;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                background-color: #f9f9f9;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                transition: background-color 0.3s;
-            }
-            .refri-item:hover {
-                background-color: #f0f0f0;
-            }
-            .refri-item span {
-                font-size: 16px;
-                color: #555;
-            }
-            .refri-item .refri-name {
-                color: #333;
-                font-size: 16px;
-                cursor: pointer;
-            }
-            .refri-item .delete-btn {
-                background-color: #f44336;
-                color: white;
-                padding: 4px 8px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-            .refri-item .delete-btn:hover {
-                background-color: #d32f2f;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>냉장고 추가 및 목록</h1>
-        <div class="container">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>냉장고 관리 및 기록</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+        .left-panel, .right-panel {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .left-panel {
+            width: 40%;
+            background-color: #ffffff;
+            border-right: 1px solid #ddd;
+        }
+        .right-panel {
+            width: 60%;
+            background-color: #fafafa;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .refri-list {
+            margin-top: 20px;
+        }
+        .refri-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .refri-item .delete-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+        }
+        .history-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h1>냉장고 추가 및 목록</h1>
             <form id="add-refri-form">
                 <input type="text" id="refri_name" name="refri_name" placeholder="냉장고 이름" required>
                 <button type="submit" onclick="add_Refri()">추가</button>
             </form>
-
             <div class="refri-list" id="refri-list">
                 <h3>냉장고 목록</h3>
-                <!-- 냉장고 리스트 뷰 -->
             </div>
         </div>
 
-        <script>
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <h1>재고 추가 및 기록</h1>
+            <div id="history-list">
+                <h3>히스토리</h3>
+            </div>
+        </div>
+    </div>
 
-            // 접속중인 유저의 냉장고 목록 반환
-            async function getRefri() {
-                const data = {
-                    User_ID: localStorage.getItem('ID')
-                };
-
-                const response = await fetch('http://127.0.0.1:5001/Search/get_Refri_ID', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                console.log(result);
-                return result;
-            }
-
-            // html로 목록 display
-            function displayRefriList(refriList) {
-                const refriListContainer = document.getElementById('refri-list');
-                refriListContainer.innerHTML = '';
-
-                refriList.forEach(refri => {
-                    const refriItem = document.createElement('div');
-                    refriItem.className = 'refri-item';
-
-                    // 이름만 표시
-                    const refriDetails = document.createElement('span');
-                    refriDetails.className = 'refri-name';
-                    refriDetails.innerHTML = refri.Refri_Name;
-                    refriDetails.onclick = function(){
-                        let Refri_ID = refri.Refri_ID;
-                        localStorage.setItem('Refri_ID', Refri_ID);
-
-                        window.location.href = '/contain_page'
-                    };
-                    
-                    const deleteButton = document.createElement('button');
-                    deleteButton.className = 'delete-btn';
-                    deleteButton.textContent = '삭제';
-                    deleteButton.onclick = () => deleteRefri(refri.Refri_ID);
-
-                    refriItem.appendChild(refriDetails);
-                    refriItem.appendChild(deleteButton);
-                    refriListContainer.appendChild(refriItem);
-                });
-            }
-
-            // 특정 냉장고 삭제
-            async function deleteRefri(refriId) {
-                data = {
-                    Refri_ID : refriId
-                };
-
-                const response = await fetch('http://127.0.0.1:5001/Fridge/delete_Refri', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                console.log(result);
-                if(result.status){
-                    alert(result.message);
-                    const refri_list = await getRefri();
-                    displayRefriList(refri_list);
-                }
-                else{
-                    alert("오류 발생");
-                }
-                
-            }
-
-            // 냉장고 추가
-            async function add_Refri(){
-                data = {
-                    Refri_Name : document.getElementById("refri_name").value,
-                    User_ID : localStorage.getItem('ID')
-                };
-
-                const response = await fetch('http://127.0.0.1:5001/Fridge/add_Refri', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                if(result.status){
-                    alert(result.message);
-                }
-                else{
-                    alert("오류 발생");
-                }
-            }
-
-            // 윈도우 초기 로딩
-            window.onload = async function() {
-                const refriList = await getRefri();
-                console.log(refriList.Refri_ID);
-                displayRefriList(refriList);
+    <script>
+        // 접속중인 유저의 냉장고 목록 반환
+        async function getRefri() {
+            const data = {
+                User_ID: localStorage.getItem('ID')
             };
-        </script>
-    </body>
+
+            const response = await fetch('http://127.0.0.1:5001/Search/get_Refri_ID', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            return result;
+        }
+
+        // 히스토리 데이터를 반환
+        async function getHistory() {
+            const data = {
+                User_ID: localStorage.getItem('ID')
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/History/get_History', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            return result;
+        }
+
+        // 냉장고 목록을 HTML로 표시
+        function displayRefriList(refriList) {
+            const refriListContainer = document.getElementById('refri-list');
+            refriListContainer.innerHTML = '';
+
+            refriList.forEach(refri => {
+                const refriItem = document.createElement('div');
+                refriItem.className = 'refri-item';
+
+                const refriDetails = document.createElement('span');
+                refriDetails.innerHTML = refri.Refri_Name;
+                refriDetails.onclick = function () {
+                    localStorage.setItem('Refri_ID', refri.Refri_ID);
+                    window.location.href = '/contain_page'
+                };
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-btn';
+                deleteButton.textContent = '삭제';
+                deleteButton.onclick = () => deleteRefri(refri.Refri_ID);
+
+                refriItem.appendChild(refriDetails);
+                refriItem.appendChild(deleteButton);
+                refriListContainer.appendChild(refriItem);
+            });
+        }
+
+        // 히스토리 목록을 HTML로 표시
+        function displayHistoryList(historyList) {
+            const historyListContainer = document.getElementById('history-list');
+            historyListContainer.innerHTML = '';
+
+            historyList.forEach(history => {
+                let input_date = new Date(history.input_date).toLocaleDateString();
+
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <strong>냉장고:</strong> ${history.refri_name}<br>
+                    <strong>음식:</strong> ${history.food_name}<br>
+                    <strong>입력 날짜:</strong> ${input_date}<br>
+                    <strong>수량:</strong> ${history.count}<br>
+                `;
+                historyListContainer.appendChild(historyItem);
+            });
+        }
+
+        // 냉장고 추가
+        async function add_Refri() {
+            const data = {
+                Refri_Name: document.getElementById("refri_name").value,
+                User_ID: localStorage.getItem('ID')
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/Fridge/add_Refri', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (result.status) {
+                alert(result.message);
+                const refriList = await getRefri();
+                displayRefriList(refriList);
+            } else {
+                alert("오류 발생");
+            }
+        }
+
+        // 특정 냉장고 삭제
+        async function deleteRefri(refriId) {
+            data = {
+                Refri_ID : refriId
+            };
+
+            const response = await fetch('http://127.0.0.1:5001/Fridge/delete_Refri', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log(result);
+            if(result.status){
+                alert(result.message);
+                const refri_list = await getRefri();
+                displayRefriList(refri_list);
+            }
+            else{
+                alert("오류 발생");
+            }
+        }
+
+
+        // 윈도우 초기 로딩
+        window.onload = async function () {
+            const refriList = await getRefri();
+            displayRefriList(refriList);
+
+            const historyList = await getHistory();
+            displayHistoryList(historyList);
+        };
+    </script>
+</body>
 </html>
