@@ -78,12 +78,33 @@
             border: none;
             border-radius: 4px;
         }
-        .history-item {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        .history-item:last-child {
-            border-bottom: none;
+        th, td {
+            text-align: center;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tbody tr {
+            border: 1px solid #eee;
+        }
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .search-container {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -106,11 +127,40 @@
             <h1>재고 추가 및 기록</h1>
             <div id="history-list">
                 <h3>히스토리</h3>
+                <div class="search-container">
+                    <input
+                        type="text"
+                        id="searchFoodOrRefriName"
+                        placeholder="냉장고 이름 또는 음식 이름 검색"
+                        oninput="filterByFoodOrRefriName()"
+                        style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
+                    />
+                </div>
+                <div class="button-container">
+                    <button onclick="sortHistory('asc')">입력날짜 오름차순</button>
+                    <button onclick="sortHistory('desc')">입력날짜 내림차순</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>냉장고 이름</th>
+                            <th>음식 이름</th>
+                            <th>입력 날짜</th>
+                            <th>수량</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- 동적으로 데이터가 삽입됩니다 -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
+        let historyList = [];
+        let filteredHistory = []; // 검색된 결과를 저장
+
         // 접속중인 유저의 냉장고 목록 반환
         async function getRefri() {
             const data = {
@@ -144,6 +194,8 @@
             });
 
             const result = await response.json();
+            historyList = result; // 데이터를 전역 변수에 저장
+            filteredHistory = [...historyList]; // 초기에는 전체 데이터를 저장
             return result;
         }
 
@@ -160,7 +212,7 @@
                 refriDetails.innerHTML = refri.Refri_Name;
                 refriDetails.onclick = function () {
                     localStorage.setItem('Refri_ID', refri.Refri_ID);
-                    window.location.href = '/contain_page'
+                    window.location.href = '/contain_page';
                 };
 
                 const deleteButton = document.createElement('button');
@@ -174,24 +226,43 @@
             });
         }
 
-        // 히스토리 목록을 HTML로 표시
-        function displayHistoryList(historyList) {
-            const historyListContainer = document.getElementById('history-list');
-            historyListContainer.innerHTML = '';
+        // 히스토리 목록을 테이블로 표시
+        function displayHistoryList(list) {
+            const historyTableBody = document.getElementById('history-table-body');
+            historyTableBody.innerHTML = ''; // 기존 데이터 비우기
 
-            historyList.forEach(history => {
+            list.forEach(history => {
                 let input_date = new Date(history.input_date).toLocaleDateString();
 
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                historyItem.innerHTML = `
-                    <strong>냉장고:</strong> ${history.refri_name}<br>
-                    <strong>음식:</strong> ${history.food_name}<br>
-                    <strong>입력 날짜:</strong> ${input_date}<br>
-                    <strong>수량:</strong> ${history.count}<br>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${history.refri_name}</td>
+                    <td>${history.food_name}</td>
+                    <td>${input_date}</td>
+                    <td>${history.count}</td>
                 `;
-                historyListContainer.appendChild(historyItem);
+                historyTableBody.appendChild(row);
             });
+        }
+
+        // 히스토리 정렬
+        function sortHistory(order) {
+            const sortedList = [...filteredHistory].sort((a, b) => {
+                const dateA = new Date(a.input_date);
+                const dateB = new Date(b.input_date);
+                return order === 'asc' ? dateA - dateB : dateB - dateA;
+            });
+            displayHistoryList(sortedList);
+        }
+
+        // 냉장고 이름 검색
+        function filterByFoodOrRefriName() {
+            const searchValue = document.getElementById('searchFoodOrRefriName').value.toLowerCase();
+            filteredHistory = historyList.filter(history =>
+                history.refri_name.toLowerCase().includes(searchValue) ||
+                history.food_name.toLowerCase().includes(searchValue)
+            );
+            displayHistoryList(filteredHistory);
         }
 
         // 냉장고 추가
@@ -221,8 +292,8 @@
 
         // 특정 냉장고 삭제
         async function deleteRefri(refriId) {
-            data = {
-                Refri_ID : refriId
+            const data = {
+                Refri_ID: refriId
             };
 
             const response = await fetch('http://127.0.0.1:5001/Fridge/delete_Refri', {
@@ -235,16 +306,14 @@
 
             const result = await response.json();
             console.log(result);
-            if(result.status){
+            if (result.status) {
                 alert(result.message);
-                const refri_list = await getRefri();
-                displayRefriList(refri_list);
-            }
-            else{
+                const refriList = await getRefri();
+                displayRefriList(refriList);
+            } else {
                 alert("오류 발생");
             }
         }
-
 
         // 윈도우 초기 로딩
         window.onload = async function () {
@@ -252,7 +321,7 @@
             displayRefriList(refriList);
 
             const historyList = await getHistory();
-            displayHistoryList(historyList);
+            displayHistoryList(filteredHistory);
         };
     </script>
 </body>
