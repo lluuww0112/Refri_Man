@@ -114,30 +114,6 @@ DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
--- -----------------------------------------------------
--- Table `refri_man`.`notification`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `refri_man`.`notification` (
-  `notification_id` INT NOT NULL AUTO_INCREMENT,
-  `user_id` VARCHAR(255) NOT NULL,
-  `food_name` VARCHAR(255) NOT NULL,
-  `input_date` DATE NOT NULL,
-  `notify_date` DATE NOT NULL,
-  PRIMARY KEY (`notification_id`),
-  INDEX `user_id` (`user_id` ASC) VISIBLE,
-  INDEX `food_name` (`food_name` ASC, `input_date` ASC) VISIBLE,
-  CONSTRAINT `notification_ibfk_1`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `refri_man`.`user` (`user_id`)
-    ON DELETE CASCADE,
-  CONSTRAINT `notification_ibfk_2`
-    FOREIGN KEY (`food_name` , `input_date`)
-    REFERENCES `refri_man`.`contain` (`food_name` , `input_date`)
-    ON DELETE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
-
 USE `refri_man`;
 
 DELIMITER $$
